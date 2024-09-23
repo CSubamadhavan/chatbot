@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Interface</title>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #000000 0%, #1a1a75 100%);
+            color: #ffffff;
+        }
+
+        #chat-container {
+            width: 400px;
+            background-color: #1a1a1a;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            border: 1px solid #ffd700; /* Gold border */
+        }
+
+        #chat-box {
+            height: 300px;
+            overflow-y: scroll;
+            padding: 10px;
+            border: 1px solid #ffd700; /* Gold border */
+            margin-bottom: 15px;
+            background-color: #000000; /* Black chat background */
+            border-radius: 12px;
+            color: #ffffff; /* White text */
+        }
+
+        .message {
+            padding: 10px 15px;
+            margin: 8px 0;
+            border-radius: 20px;
+            font-size: 14px;
+            display: inline-block;
+            max-width: 80%;
+        }
+
+        .user {
+            background-color: #1a1a75; /* Dark Blue */
+            color: #ffffff;
+            text-align: right;
+            float: right;
+            clear: both;
+        }
+
+        .bot {
+            background-color: #e32636; /* Red for bot messages */
+            color: #ffffff;
+            float: left;
+            clear: both;
+        }
+
+        #user-input {
+            width: calc(100% - 50px);
+            padding: 12px;
+            border: 1px solid #ffd700; /* Gold border */
+            border-radius: 25px;
+            outline: none;
+            font-size: 14px;
+            background-color: #1a1a75; /* Dark blue input */
+            color: #ffffff;
+            margin-right: 10px;
+        }
+
+        button {
+            padding: 12px;
+            background-color: #ffd700; /* Gold for send button */
+            color: black;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 18px;
+            outline: none;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #e32636; /* Hover red */
+        }
+
+        .query-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+        }
+
+        .query-buttons button {
+            background-color: #1a1a75; /* Dark Blue for query buttons */
+            color: #ffd700; /* Gold text */
+            padding: 10px 20px;
+            border: 1px solid #ffd700; /* Gold border */
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .query-buttons button:hover {
+            background-color: #e32636; /* Hover red */
+            color: #ffffff;
+        }
+
+        .icon-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 50px;
+            width: 50px;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+
+<div id="chat-container">
+    <div id="chat-box"></div>
+
+    <div style="display: flex; align-items: center;">
+        <input type="text" id="user-input" placeholder="Type your message here...">
+        <button onclick="sendMessage()" class="icon-btn"><i class="fas fa-paper-plane"></i></button>
+    </div>
+
+    <div class="query-buttons">
+        <button onclick="sendPredefinedMessage('How to join in workshop?')"><i class="fas fa-info-circle"></i> Workshop Info</button>
+        <button onclick="sendPredefinedMessage('Is there a registration fee?')"><i class="fas fa-money-bill-wave"></i> Fees Info</button>
+        <button onclick="sendPredefinedMessage('When is the event/appointment/meeting scheduled?')"><i class="fas fa-calendar-alt"></i> Event Timing</button>
+    </div>
+</div>
+
+<script>
+    async function sendMessage() {
+        const userInput = document.getElementById("user-input").value;
+        if (!userInput) return;
+
+        displayMessage(userInput, 'user');
+
+        const response = await fetch('http://127.0.0.1:5000/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ message: userInput })
+        });
+
+        const data = await response.json();
+        displayMessage(data.response, 'bot');
+        document.getElementById("user-input").value = ''; // Clear input
+    }
+
+    async function sendPredefinedMessage(message) {
+        displayMessage(message, 'user');
+
+        const response = await fetch('http://127.0.0.1:5000/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ message: message })
+        });
+
+        const data = await response.json();
+        displayMessage(data.response, 'bot');
+    }
+
+    function displayMessage(message, sender) {
+        const chatBox = document.getElementById("chat-box");
+        const messageElement = document.createElement("div");
+        messageElement.classList.add('message', sender);
+        messageElement.innerText = message;
+        chatBox.appendChild(messageElement);
+        chatBox.scrollTop = chatBox.scrollHeight; // Scroll to bottom
+    }
+</script>
+
+</body>
+</html>
